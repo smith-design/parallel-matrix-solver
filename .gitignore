@@ -4,8 +4,7 @@ parallel_block_solver
 *.o
 *.mod
 
-# Output files
-solution_*.txt
+# Output files (keep solution files for reference)
 
 # macOS
 .DS_Store
