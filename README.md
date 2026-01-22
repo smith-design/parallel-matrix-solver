@@ -248,13 +248,176 @@ end do
 ### 环境要求
 
 - Fortran 编译器: gfortran 或 ifort
-- MPI 库: Open MPI 或 MPICH
-- 操作系统: Linux / macOS
+- MPI 库: Open MPI 或 MPICH 或 Microsoft MPI
+- 操作系统: Linux / macOS / Windows
 
-### 安装 MPI (macOS)
+---
+
+### macOS 安装指南
 
 ```bash
-brew install open-mpi
+# 安装 Homebrew (如果没有)
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# 安装 GCC (包含 gfortran) 和 Open MPI
+brew install gcc open-mpi
+
+# 验证安装
+gfortran --version
+mpif90 --version
+```
+
+---
+
+### Linux (Ubuntu/Debian) 安装指南
+
+```bash
+# 更新包管理器
+sudo apt update
+
+# 安装 GCC Fortran 和 Open MPI
+sudo apt install gfortran libopenmpi-dev openmpi-bin
+
+# 验证安装
+gfortran --version
+mpif90 --version
+```
+
+---
+
+### Windows 安装指南
+
+Windows 下有多种方式运行本项目：
+
+#### 方法一：使用 MSYS2 + MinGW (推荐)
+
+1. **下载安装 MSYS2**
+   - 访问 https://www.msys2.org/
+   - 下载并运行安装程序
+   - 默认安装到 `C:\msys64`
+
+2. **安装编译器和 MPI**
+   ```bash
+   # 打开 MSYS2 MinGW 64-bit 终端
+   # 更新包数据库
+   pacman -Syu
+   
+   # 安装 GCC Fortran
+   pacman -S mingw-w64-x86_64-gcc-fortran
+   
+   # 安装 MPI (MS-MPI 兼容)
+   pacman -S mingw-w64-x86_64-msmpi
+   ```
+
+3. **编译运行**
+   ```bash
+   cd /path/to/parallel-matrix-solver
+   
+   # 编译
+   gfortran -O3 -o lu_solver.exe lu_solver.f90
+   mpif90 -O3 -o parallel_block_solver.exe parallel_block_solver.f90
+   
+   # 运行串行版本
+   ./lu_solver.exe
+   
+   # 运行并行版本
+   mpiexec -np 4 ./parallel_block_solver.exe
+   ```
+
+#### 方法二：使用 Microsoft MPI + Intel Fortran
+
+1. **安装 Microsoft MPI**
+   - 访问 https://docs.microsoft.com/en-us/message-passing-interface/microsoft-mpi
+   - 下载并安装 `msmpisetup.exe` (运行时)
+   - 下载并安装 `msmpisdk.msi` (开发包)
+
+2. **安装 Intel oneAPI HPC Toolkit**
+   - 访问 https://www.intel.com/content/www/us/en/developer/tools/oneapi/hpc-toolkit.html
+   - 下载并安装 (包含 ifort 编译器)
+
+3. **编译运行** (在 Intel oneAPI 命令提示符中)
+   ```cmd
+   cd C:\path\to\parallel-matrix-solver
+   
+   # 编译串行版本
+   ifort /O3 /o lu_solver.exe lu_solver.f90
+   
+   # 编译并行版本
+   mpiifort /O3 /o parallel_block_solver.exe parallel_block_solver.f90
+   
+   # 运行
+   lu_solver.exe
+   mpiexec -np 4 parallel_block_solver.exe
+   ```
+
+#### 方法三：使用 WSL (Windows Subsystem for Linux)
+
+1. **启用 WSL**
+   ```powershell
+   # 以管理员身份运行 PowerShell
+   wsl --install
+   ```
+
+2. **安装 Ubuntu**
+   - 从 Microsoft Store 安装 Ubuntu
+   - 启动并完成初始设置
+
+3. **在 WSL 中安装依赖**
+   ```bash
+   sudo apt update
+   sudo apt install gfortran libopenmpi-dev openmpi-bin
+   ```
+
+4. **编译运行** (与 Linux 相同)
+   ```bash
+   cd /mnt/c/path/to/parallel-matrix-solver
+   make
+   mpirun -np 4 ./parallel_block_solver
+   ```
+
+#### 方法四：使用 Cygwin
+
+1. **下载安装 Cygwin**
+   - 访问 https://www.cygwin.com/
+   - 运行安装程序
+
+2. **选择安装包**
+   - `gcc-fortran`
+   - `openmpi`
+   - `libopenmpi-devel`
+
+3. **编译运行** (在 Cygwin 终端中)
+   ```bash
+   cd /cygdrive/c/path/to/parallel-matrix-solver
+   make
+   mpirun -np 4 ./parallel_block_solver
+   ```
+
+---
+
+### Windows 常见问题
+
+**Q: 运行时提示找不到 mpi.dll**
+```
+A: 确保 Microsoft MPI 的 bin 目录在 PATH 环境变量中
+   通常是 C:\Program Files\Microsoft MPI\Bin
+```
+
+**Q: mpif90 命令不存在**
+```
+A: Windows 下使用 mpifort 或 mpiifort (Intel) 代替
+   或在 MSYS2 中使用 gfortran 配合 msmpi
+```
+
+**Q: 编译时链接错误**
+```
+A: 确保安装了 MPI SDK (开发包)，不仅仅是运行时
+```
+
+**Q: 并行程序只用了一个核心**
+```
+A: 检查 mpiexec 是否正确安装
+   尝试: mpiexec -np 4 hostname 测试 MPI 是否工作
 ```
 
 ### 编译
