@@ -1,0 +1,14 @@
+# Compiled binaries
+lu_solver
+parallel_block_solver
+*.o
+*.mod
+
+# Output files
+solution_*.txt
+
+# macOS
+.DS_Store
+
+# Large data files (too big for git)
+datasets/
